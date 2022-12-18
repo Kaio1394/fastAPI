@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi import status
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 
 from models import Curso
 
@@ -28,14 +29,16 @@ async def put(curso_id: int, curso: Curso):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Curso não encontrado.')
 
-@app.delete('/cursos/{curso_id}')
+@app.delete('/cursos/{curso_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete(curso_id: int):
-    del cursos[curso_id]
+    if curso_id in cursos:
+        del cursos[curso_id]
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Id não encontrado.')
 
 @app.post('/cursos', status_code=status.HTTP_201_CREATED)
 async def post(curso: Curso):
     next_id: int = len(cursos) + 1
-    # curso.id = next_id
     cursos[next_id] = curso
     del curso.id
     return curso
